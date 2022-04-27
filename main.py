@@ -28,7 +28,7 @@ class MyAnimeList:
                 self.token = json.load(file)
         else:
             self._authorize()
-        self.alist = mal.get_animelist()
+        self.alist = self.get_animelist()
 
     async def _auth_url(self):
         """Print the URL needed to authorise your application."""
@@ -109,7 +109,7 @@ class MyAnimeList:
         params = "?fields=list_status&limit=100&nsfw=true"
         url = f"https://api.myanimelist.net/v2/users/@me/animelist{params}"
         while True:
-            response = mal.get(url).json()
+            response = self.get(url).json()
             animelist += response["data"]
             print(f"{len(animelist)}/{num_anime}")
             if "next" in response["paging"]:
@@ -151,7 +151,7 @@ class MyAnimeList:
             title = MyAnimeList.format_title(title)
             Path("cache").mkdir(exist_ok=True)
             outfile = f"cache/{anime_id}.json"
-            mal.cache_anime_update_history(anime_id, outfile)
+            self.cache_anime_update_history(anime_id, outfile)
         print("Cached watch histories!")
 
     def dmY_to_Ymd(self, date: str):
@@ -189,14 +189,14 @@ class MyAnimeList:
         Does not account for rewatch; sets finish date as most recent
         finish date.
         """
-        for i in mal.get_reorder_df().itertuples():
+        for i in self.get_reorder_df().itertuples():
             anime_id = i.id
             metadata = {
                 "score": i.score,
                 "start_date": i.start_date,
                 "finish_date": i.finish_date,
             }
-            print(mal.patch_anime(anime_id, metadata).text)
+            print(self.patch_anime(anime_id, metadata).text)
 
 
 if __name__ == "__main__":
